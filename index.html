@@ -3,55 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LTA Bus API Test</title>
+    <title>Dashboard</title>
     <style>
-        body { font-family: monospace; background: #121212; color: #00ff66; padding: 20px; }
-        input, button { padding: 8px 12px; font-size: 16px; margin-bottom: 15px; }
-        #status { color: #ffb703; margin-bottom: 10px; }
-        pre { background: #1a1a1a; padding: 15px; border-radius: 6px; overflow-x: auto; color: #fff; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #0b0b0c;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        /* TOP: Hero Time & Weather */
+        .top-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 5px 0;
+        }
+
+        #clock {
+            font-size: clamp(90px, 14vw, 180px);
+            font-weight: 700;
+            line-height: 0.85;
+            letter-spacing: -3px;
+        }
+
+        #clock .ampm {
+            font-size: 0.45em;
+            font-weight: 500;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        #date {
+            font-size: clamp(16px, 2vw, 24px);
+            color: #8a8a8f;
+            font-weight: 400;
+            margin-top: 6px;
+            margin-bottom: 12px;
+        }
+
+        .weather-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 18px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #weather-temp {
+            font-size: 22px;
+            font-weight: 500;
+            color: #00bcd4;
+        }
+
+        #weather-desc {
+            font-size: 15px;
+            color: #8a8a8f;
+        }
+
+        /* BOTTOM: 3-Column Bus Display */
+        .bottom-section {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .bus-refresh-notice {
+            text-align: center;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #66666e;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .bus-columns-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 1fr !important;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .bus-station-column {
+            background: #121214;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bus-station-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 6px;
+            margin-bottom: 2px;
+        }
+
+        .station-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .station-code {
+            font-size: 11px;
+            color: #8a8a8f;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .bus-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #18181c;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+
+        .bus-number {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffb703;
+        }
+
+        .bus-timings {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .timing-pill {
+            font-size: 12px;
+            font-weight: 500;
+            color: #8a8a8f;
+        }
+
+        .timing-pill.next {
+            color: #4caf50;
+            font-weight: 700;
+        }
+
+        .timing-pill.subsequent {
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
 
-    <h2>LTA Bus API Test Page</h2>
-    
-    <div>
-        <label for="stopCode">Bus Stop Code:</label>
-        <input type="text" id="stopCode" value="65431" />
-        <button onclick="testApi()">Fetch Data</button>
+    <!-- TOP: Clock, Date & Weather -->
+    <div class="top-section">
+        <div id="clock">00:00</div>
+        <div id="date">Loading status...</div>
+        
+        <div class="weather-group">
+            <div id="weather-temp">--°C</div>
+            <div id="weather-desc">Loading...</div>
+        </div>
     </div>
 
-    <div id="status">Status: Idle</div>
-    <pre id="output">JSON output will appear here...</pre>
+    <!-- BOTTOM: 3 Bus Stations Layout -->
+    <div class="bottom-section">
+        <div class="bus-refresh-notice">Refreshes every 20 seconds</div>
+        <div class="bus-columns-grid" id="bus-container">
+            <!-- Dynamically populated via JS -->
+        </div>
+    </div>
 
     <script>
-        async function testApi() {
-            const code = document.getElementById('stopCode').value;
-            const statusEl = document.getElementById('status');
-            const outputEl = document.getElementById('output');
+        // ================= CONFIGURATION =================      
+        const LATITUDE = "1.400962806513855"; // Your local latitude (Default: Singapore)
+        const LONGITUDE = "103.89462937852629"; // Your local longitude
+        // =================================================
 
-            statusEl.innerText = 'Status: Fetching...';
-            outputEl.innerText = 'Loading...';
+        // --- 1. CLOCK & DATE LOGIC ---
+        function updateClock() {
+            const now = new Date();
+            
+            // Format time with small AM/PM
+            const timeStr = now.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', hour12: true });
+            const [time, period] = timeStr.split(' ');
+            document.getElementById('clock').innerHTML = `${time} <span class="ampm">${period.toUpperCase()}</span>`;
+            
+            // Format date
+            const options = { weekday: 'long', day: 'numeric', month: 'short' };
+            document.getElementById('date').innerText = now.toLocaleDateString('en-SG', options);
+        }
 
+        // Run immediately and update every second
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        // --- 2. Open-Meteo Weather API Integration (No key needed) ---
+        // WMO Code Translation Helper
+        function interpretWMO(code) {
+            if (code === 0) return "Clear Sky";
+            if ([1, 2, 3].includes(code)) return "Partly Cloudy";
+            if ([45, 48].includes(code)) return "Foggy";
+            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return "Rainy";
+            if ([95, 96, 99].includes(code)) return "Thunderstorm";
+            return "Cloudy";
+        }
+
+        async function fetchWeather() {
             try {
-                // Calls relative endpoint /api/bus
-                const response = await fetch(`/api/bus?code=${code}`);
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}&current_weather=true`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Network response error");
                 const data = await response.json();
+                
+                const temp = Math.round(data.current_weather.temperature);
+                const condition = interpretWMO(data.current_weather.weathercode);
+                
+                document.getElementById('weather-temp').innerText = `${temp}°C`;
+                document.getElementById('weather-desc').innerText = condition;
+            } catch (error) {
+                console.error("Weather update failed:", error);
+                document.getElementById('weather-desc').innerText = "Weather Sync Error";
+            }
+        }
+        // Weather updates every 15 minutes to save data usage
+        setInterval(fetchWeather, 900000); 
+        fetchWeather();
 
-                if (!response.ok) {
-                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
+
+        // --- 3. BUS DATA REFRESH LOGIC ---
+        // --- 3. BUS DATA REFRESH LOGIC ---
+
+        // Define your target 3 bus stations and up to 5 bus services each
+        const BUS_STATIONS = [
+            { code: "65539", name: "Blk 224A", services: ["104", "382W"] },
+            { code: "65531", name: "Blk 226A", services: ["104", "382G"] },
+            { code: "65431", name: "Twin Waterfalls", services: ["39", "43", "104", "119", "118"] }
+        ];
+
+        // Helper to convert estimated arrival timestamp to relative minutes
+        function calculateETA(arrivalTimeStr) {
+            if (!arrivalTimeStr) return "--";
+            const diffMs = new Date(arrivalTimeStr) - new Date();
+            const diffMins = Math.round(diffMs / 60000);
+            if (diffMins <= 0) return "Arr";
+            return `${diffMins}m`;
+        }
+
+        // Fetch data from serverless API endpoint
+        async function fetchBusArrivals() {
+            for (const station of BUS_STATIONS) {
+                try {
+                    // Call your Vercel proxy endpoint (bypasses CORS and hides LTA_API_KEY)
+                    const response = await fetch(`/api/bus?code=${station.code}`);
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    const rawServices = data.Services || [];
+
+                    // Filter API results to keep ONLY your specified bus numbers
+                    const filteredServices = rawServices.filter(bus => 
+                        station.services.includes(bus.ServiceNo)
+                    );
+
+                    // Sort filtered buses based on the order defined in your array
+                    filteredServices.sort((a, b) => 
+                        station.services.indexOf(a.ServiceNo) - station.services.indexOf(b.ServiceNo)
+                    );
+
+                    // Render station column
+                    renderStationColumn(station, filteredServices);
+
+                } catch (err) {
+                    console.error(`Failed to fetch bus data for ${station.code}:`, err);
                 }
-
-                statusEl.innerText = `Status: Success! (${data.Services?.length || 0} services found)`;
-                outputEl.innerText = JSON.stringify(data, null, 2);
-            } catch (err) {
-                statusEl.innerText = 'Status: Failed!';
-                outputEl.innerText = err.message;
             }
         }
 
-        // Run immediately on page load
-        testApi();
+        // Helper function to build and attach station columns
+        function renderStationColumn(station, servicesData) {
+            const container = document.getElementById('bus-container');
+
+            // Reuse existing station element or create a new one
+            let col = document.getElementById(`station-${station.code}`);
+            if (!col) {
+                col = document.createElement('div');
+                col.id = `station-${station.code}`;
+                col.className = 'bus-station-column';
+                container.appendChild(col);
+            }
+
+            let rowsHtml = '';
+            
+            // Generate row for each matching bus
+            servicesData.forEach(bus => {
+                const eta1 = calculateETA(bus.NextBus?.EstimatedArrival);
+                const eta2 = calculateETA(bus.NextBus2?.EstimatedArrival);
+                const eta3 = calculateETA(bus.NextBus3?.EstimatedArrival);
+
+                rowsHtml += `
+                    <div class="bus-row">
+                        <span class="bus-number">${bus.ServiceNo}</span>
+                        <div class="bus-timings">
+                            <span class="timing-pill next">${eta1}</span>
+                            <span class="timing-pill subsequent">${eta2}</span>
+                            <span class="timing-pill">${eta3}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (servicesData.length === 0) {
+                rowsHtml = `<div style="font-size: 12px; color: #666; padding: 10px;">No operating buses found</div>`;
+            }
+
+            col.innerHTML = `
+                <div class="bus-station-header">
+                    <span class="station-name">${station.name}</span>
+                    <span class="station-code">${station.code}</span>
+                </div>
+                ${rowsHtml}
+            `;
+        }
+
+        // Run bus fetch immediately on load
+        fetchBusArrivals();
+
+        // Refresh bus arrivals automatically every 20 seconds
+        setInterval(fetchBusArrivals, 20000);
     </script>
 </body>
 </html>
