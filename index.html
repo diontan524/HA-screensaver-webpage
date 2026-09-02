@@ -260,6 +260,18 @@
         // --- 3. BUS DATA REFRESH LOGIC ---
 
         // Define your target 3 bus stations and up to 5 bus services each
+        // --- 3. BUS DATA REFRESH LOGIC ---
+
+        // Inject CSS styles dynamically for crowd color coding
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .timing-pill.load-sea { color: #2ecc71; border-color: #2ecc71; } /* Green - Low Crowd */
+            .timing-pill.load-sda { color: #f1c40f; border-color: #f1c40f; } /* Yellow - Moderate */
+            .timing-pill.load-lsd { color: #e74c3c; border-color: #e74c3c; } /* Red - Crowded */
+        `;
+        document.head.appendChild(style);
+
+        // Define your target 3 bus stations and up to 5 bus services each
         const BUS_STATIONS = [
             { code: "65539", name: "Blk 224A", services: ["104", "382W"] },
             { code: "65531", name: "Blk 226A", services: ["104", "382G"] },
@@ -275,11 +287,20 @@
             return `${diffMins}m`;
         }
 
+        // Maps LTA Load values ("SEA", "SDA", "LSD") to corresponding CSS class names
+        function getLoadClass(loadCode) {
+            switch (loadCode) {
+                case "SEA": return "load-sea"; // Seats Available (Green)
+                case "SDA": return "load-sda"; // Standing Available (Yellow)
+                case "LSD": return "load-lsd"; // Limited Standing (Red)
+                default: return "";
+            }
+        }
+
         // Fetch data from serverless API endpoint
         async function fetchBusArrivals() {
             for (const station of BUS_STATIONS) {
                 try {
-                    // Call your Vercel proxy endpoint (bypasses CORS and hides LTA_API_KEY)
                     const response = await fetch(`/api/bus?code=${station.code}`);
 
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -324,16 +345,21 @@
             // Generate row for each matching bus
             servicesData.forEach(bus => {
                 const eta1 = calculateETA(bus.NextBus?.EstimatedArrival);
+                const load1 = getLoadClass(bus.NextBus?.Load);
+
                 const eta2 = calculateETA(bus.NextBus2?.EstimatedArrival);
+                const load2 = getLoadClass(bus.NextBus2?.Load);
+
                 const eta3 = calculateETA(bus.NextBus3?.EstimatedArrival);
+                const load3 = getLoadClass(bus.NextBus3?.Load);
 
                 rowsHtml += `
                     <div class="bus-row">
                         <span class="bus-number">${bus.ServiceNo}</span>
                         <div class="bus-timings">
-                            <span class="timing-pill next">${eta1}</span>
-                            <span class="timing-pill subsequent">${eta2}</span>
-                            <span class="timing-pill">${eta3}</span>
+                            <span class="timing-pill next ${load1}">${eta1}</span>
+                            <span class="timing-pill subsequent ${load2}">${eta2}</span>
+                            <span class="timing-pill ${load3}">${eta3}</span>
                         </div>
                     </div>
                 `;
@@ -355,8 +381,8 @@
         // Run bus fetch immediately on load
         fetchBusArrivals();
 
-        // Refresh bus arrivals automatically every 20 seconds
-        setInterval(fetchBusArrivals, 20000);
+        // Refresh bus arrivals automatically every 5 seconds
+        setInterval(fetchBusArrivals, 5000);
     </script>
 </body>
 </html>
