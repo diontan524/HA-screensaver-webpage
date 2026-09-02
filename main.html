@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTA Bus API Test</title>
+    <style>
+        body { font-family: monospace; background: #121212; color: #00ff66; padding: 20px; }
+        input, button { padding: 8px 12px; font-size: 16px; margin-bottom: 15px; }
+        #status { color: #ffb703; margin-bottom: 10px; }
+        pre { background: #1a1a1a; padding: 15px; border-radius: 6px; overflow-x: auto; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <h2>LTA Bus API Test Page</h2>
+    
+    <div>
+        <label for="stopCode">Bus Stop Code:</label>
+        <input type="text" id="stopCode" value="65431" />
+        <button onclick="testApi()">Fetch Data</button>
+    </div>
+
+    <div id="status">Status: Idle</div>
+    <pre id="output">JSON output will appear here...</pre>
+
+    <script>
+        async function testApi() {
+            const code = document.getElementById('stopCode').value;
+            const statusEl = document.getElementById('status');
+            const outputEl = document.getElementById('output');
+
+            statusEl.innerText = 'Status: Fetching...';
+            outputEl.innerText = 'Loading...';
+
+            try {
+                // Calls relative endpoint /api/bus
+                const response = await fetch(`/api/bus?code=${code}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                }
+
+                statusEl.innerText = `Status: Success! (${data.Services?.length || 0} services found)`;
+                outputEl.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                statusEl.innerText = 'Status: Failed!';
+                outputEl.innerText = err.message;
+            }
+        }
+
+        // Run immediately on page load
+        testApi();
+    </script>
+</body>
+</html>
