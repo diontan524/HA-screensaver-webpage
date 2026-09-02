@@ -210,7 +210,7 @@
             const now = new Date();
             
             // Format time with small AM/PM
-            const timeStr = now.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            const timeStr = now.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', hour12: true });
             const [time, period] = timeStr.split(' ');
             document.getElementById('clock').innerHTML = `${time} <span class="ampm">${period.toUpperCase()}</span>`;
             
