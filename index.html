@@ -193,7 +193,7 @@
 
     <!-- BOTTOM: 3 Bus Stations Layout -->
     <div class="bottom-section">
-        <div class="bus-refresh-notice">Refreshes every 20 seconds</div>
+        <div class="bus-refresh-notice">Refreshes every 5 seconds</div>
         <div class="bus-columns-grid" id="bus-container">
             <!-- Dynamically populated via JS -->
         </div>
@@ -265,6 +265,20 @@
         // Inject CSS styles dynamically for crowd color coding
         const style = document.createElement('style');
         style.innerHTML = `
+            /* Bus Service Number Font Size */
+            .bus-number { 
+                font-size: 1.5rem !important;  /* Increased font size (default is usually ~1rem) */
+                font-weight: bold; 
+            }
+
+            /* Bus Arrival Timing Pills Font Size */
+            .timing-pill { 
+                font-size: 1.25rem !important; /* Increased font size */
+                padding: 4px 10px !important;  /* Added extra padding so text isn't cramped */
+                font-weight: 600;
+            }
+
+            /* Crowd Load Color Classes */
             .timing-pill.load-sea { color: #2ecc71; border-color: #2ecc71; } /* Green - Low Crowd */
             .timing-pill.load-sda { color: #f1c40f; border-color: #f1c40f; } /* Yellow - Moderate */
             .timing-pill.load-lsd { color: #e74c3c; border-color: #e74c3c; } /* Red - Crowded */
