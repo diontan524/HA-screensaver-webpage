@@ -257,7 +257,6 @@
 
 
         // --- 3. BUS DATA REFRESH LOGIC ---
-        // --- 3. BUS DATA REFRESH LOGIC ---
 
         // Define your target 3 bus stations and up to 5 bus services each
         // --- 3. BUS DATA REFRESH LOGIC ---
@@ -280,8 +279,8 @@
 
             /* Crowd Load Color Classes */
             .timing-pill.load-sea { color: #00FF66; border-color: #00FF66; } /* Green - Low Crowd */
-            .timing-pill.load-sda { color: #FF0000; border-color: #FF0000; } /* Yellow - Moderate */
-            .timing-pill.load-lsd { color: #FFFF00; border-color: #FFFF00; } /* Red - Crowded */
+            .timing-pill.load-sda { color: #FFFF00; border-color: #FFFF00; } /* Yellow - Moderate */
+            .timing-pill.load-lsd { color: #FF0000; border-color: #FF0000; } /* Red - Crowded */
         `;
         document.head.appendChild(style);
 
@@ -289,6 +288,7 @@
         const BUS_STATIONS = [
             { code: "65539", name: "Blk 224A", services: ["104", "382W"] },
             { code: "65531", name: "Blk 226A", services: ["104", "382G"] },
+            { code: "65439", name: "Blk 220C", services: ["39", "43", "104", "118", "119", "117"] },
             { code: "65431", name: "Twin Waterfalls", services: ["39", "43", "104", "119", "118"] }
         ];
 
