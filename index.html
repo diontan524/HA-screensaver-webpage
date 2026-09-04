@@ -295,7 +295,7 @@
         // Helper to convert estimated arrival timestamp to relative minutes
         function calculateETA(arrivalTimeStr) {
             if (!arrivalTimeStr) return "--";
-            const diffMs = new Date(arrivalTimeStr) - new Date();
+            const diffMs = new Date(arrivalTimeStr) - new Date() - 30000;
             const diffMins = Math.round(diffMs / 60000);
             if (diffMins <= 0) return "Arr";
             return `${diffMins}m`;
