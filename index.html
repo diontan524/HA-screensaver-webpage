@@ -292,10 +292,19 @@
             { code: "65431", name: "Twin Waterfalls", services: ["39", "43", "104", "117", "118", "119"] }
         ];
 
-        // Helper to convert estimated arrival timestamp to relative minutes
+        // Return null for buses that arrived more than 45 seconds ago
         function calculateETA(arrivalTimeStr) {
-            if (!arrivalTimeStr) return "--";
-            const diffMs = new Date(arrivalTimeStr) - new Date() - 30000;
+            if (!arrivalTimeStr) return null;
+            
+            // Time difference in milliseconds with your 30s buffer
+            const diffMs = (new Date(arrivalTimeStr) - new Date()) - 30000;
+            const diffSeconds = diffMs / 1000;
+            
+            // If the bus arrived more than 45 seconds ago, mark it as expired/passed
+            if (diffSeconds < -45) {
+                return "EXPIRED"; 
+            }
+            
             const diffMins = Math.round(diffMs / 60000);
             if (diffMins <= 0) return "Arr";
             return `${diffMins}m`;
@@ -345,7 +354,6 @@
         function renderStationColumn(station, servicesData) {
             const container = document.getElementById('bus-container');
 
-            // Reuse existing station element or create a new one
             let col = document.getElementById(`station-${station.code}`);
             if (!col) {
                 col = document.createElement('div');
@@ -356,7 +364,6 @@
 
             let rowsHtml = '';
             
-            // Generate row for each matching bus
             servicesData.forEach(bus => {
                 const eta1 = calculateETA(bus.NextBus?.EstimatedArrival);
                 const load1 = getLoadClass(bus.NextBus?.Load);
@@ -367,13 +374,34 @@
                 const eta3 = calculateETA(bus.NextBus3?.EstimatedArrival);
                 const load3 = getLoadClass(bus.NextBus3?.Load);
 
+                // SHIFT LOGIC: If NextBus has passed ("EXPIRED"), shift NextBus2 into the first slot
+                let activeEta1 = eta1;
+                let activeLoad1 = load1;
+                let activeEta2 = eta2;
+                let activeLoad2 = load2;
+                let activeEta3 = eta3;
+                let activeLoad3 = load3;
+
+                if (eta1 === "EXPIRED") {
+                    activeEta1 = eta2;
+                    activeLoad1 = load2;
+                    activeEta2 = eta3;
+                    activeLoad2 = load3;
+                    activeEta3 = null;
+                }
+
+                // Only render pills if data exists and hasn't expired
+                const pill1 = activeEta1 && activeEta1 !== "EXPIRED" ? `<span class="timing-pill next ${activeLoad1}">${activeEta1}</span>` : '';
+                const pill2 = activeEta2 && activeEta2 !== "EXPIRED" ? `<span class="timing-pill subsequent ${activeLoad2}">${activeEta2}</span>` : '';
+                const pill3 = activeEta3 && activeEta3 !== "EXPIRED" ? `<span class="timing-pill ${activeLoad3}">${activeEta3}</span>` : '';
+
                 rowsHtml += `
                     <div class="bus-row">
                         <span class="bus-number">${bus.ServiceNo}</span>
                         <div class="bus-timings">
-                            <span class="timing-pill next ${load1}">${eta1}</span>
-                            <span class="timing-pill subsequent ${load2}">${eta2}</span>
-                            <span class="timing-pill ${load3}">${eta3}</span>
+                            ${pill1}
+                            ${pill2}
+                            ${pill3}
                         </div>
                     </div>
                 `;
