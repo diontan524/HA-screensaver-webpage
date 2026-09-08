@@ -322,31 +322,28 @@
 
         // Fetch data from serverless API endpoint
         async function fetchBusArrivals() {
-            for (const station of BUS_STATIONS) {
-                try {
-                    const response = await fetch(`/api/bus?code=${station.code}`);
-
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    
-                    const data = await response.json();
-                    const rawServices = data.Services || [];
-
-                    // Filter API results to keep ONLY your specified bus numbers
-                    const filteredServices = rawServices.filter(bus => 
-                        station.services.includes(bus.ServiceNo)
-                    );
-
-                    // Sort filtered buses based on the order defined in your array
-                    filteredServices.sort((a, b) => 
-                        station.services.indexOf(a.ServiceNo) - station.services.indexOf(b.ServiceNo)
-                    );
-
-                    // Render station column
-                    renderStationColumn(station, filteredServices);
-
-                } catch (err) {
-                    console.error(`Failed to fetch bus data for ${station.code}:`, err);
+            try {
+                // 1. Single API call to your bundled backend handler
+                const response = await fetch('/api/bus-all');
+                
+                if (!response.ok) {
+                    console.error("Failed to fetch bus data");
+                    return;
                 }
+
+                // Returns an array of bus stop data objects in the same order as STATIONS
+                const allStopsData = await response.json();
+
+                // 2. Loop through each station and render using the matching data index
+                BUS_STATIONS.forEach((station, index) => {
+                    const stopData = allStopsData[index];
+                    const services = stopData?.Services || [];
+                    
+                    renderStationColumn(station, services);
+                });
+
+            } catch (error) {
+                console.error("Error updating bus dashboard:", error);
             }
         }
 
@@ -421,13 +418,13 @@
         }
 
                 // --- CONFIGURATION ---
-        const POLL_INTERVAL = 10; // Fetch every 20 seconds
+        const POLL_INTERVAL = 20; // Fetch every 20 seconds
         let countdown = POLL_INTERVAL;
 
         // Check if current time is within operating hours (6:00 AM to 11:59 PM)
         function isOperatingHours() {
             const hour = new Date().getHours();
-            return hour >= 6 && hour < 24; // True between 06:00 and 23:59
+            return hour >= 6 && hour < 1; // True between 06:00 and 23:59
         }
 
         // UI Update Function
