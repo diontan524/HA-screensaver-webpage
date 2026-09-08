@@ -1,11 +1,13 @@
 // /api/bus-all.js
 export default async function handler(req, res) {
     const busStops = ['65539', '65549', '65559', '65569']; // All your kiosk stops
-    
+    if (!process.env.LTA_KEY) {
+        return res.status(500).json({ error: 'LTA_KEY environment variable is missing.' });
+    }
     try {
         const results = await Promise.all(
             busStops.map(code => 
-                fetch(`http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${code}`, {
+                fetch(`https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?BusStopCode=${code}`, {
                     headers: { AccountKey: process.env.LTA_KEY },
                     'accept': 'application/json'
                 }).then(r => r.json())
