@@ -424,8 +424,7 @@
         // Check if current time is within operating hours (6:00 AM to 11:59 PM)
         function isOperatingHours() {
             const hour = new Date().getHours();
-            // return hour >= 6 && hour < 24; // True between 06:00 and 23:59
-            return true;
+            return hour >= 6 && hour < 24; // True between 06:00 and 23:59
         }
 
         // UI Update Function
