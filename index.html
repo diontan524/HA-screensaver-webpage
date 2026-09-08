@@ -193,7 +193,7 @@
 
     <!-- BOTTOM: 3 Bus Stations Layout -->
     <div class="bottom-section">
-        <div class="bus-refresh-notice" id="refresh-timer">Refreshes every 20 seconds</div>
+        <div class="bus-refresh-notice" id="refresh-timer">Refreshing in 10s...</div>
         <div class="bus-columns-grid" id="bus-container">
             <!-- Dynamically populated via JS -->
         </div>
@@ -300,8 +300,8 @@
             const diffMs = (new Date(arrivalTimeStr) - new Date()) - 30000;
             const diffSeconds = diffMs / 1000;
             
-            // If the bus arrived more than 45 seconds ago, mark it as expired/passed
-            if (diffSeconds < -45) {
+            // If the bus arrived more than 20 seconds ago, mark it as expired/passed
+            if (diffSeconds < -20) {
                 return "EXPIRED"; 
             }
             
@@ -421,7 +421,7 @@
         }
 
                 // --- CONFIGURATION ---
-        const POLL_INTERVAL = 20; // Fetch every 20 seconds
+        const POLL_INTERVAL = 10; // Fetch every 20 seconds
         let countdown = POLL_INTERVAL;
 
         // Check if current time is within operating hours (6:00 AM to 11:59 PM)
