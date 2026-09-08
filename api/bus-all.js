@@ -6,7 +6,8 @@ export default async function handler(req, res) {
         const results = await Promise.all(
             busStops.map(code => 
                 fetch(`http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${code}`, {
-                    headers: { AccountKey: process.env.LTA_KEY }
+                    headers: { AccountKey: process.env.LTA_KEY },
+                    'accept': 'application/json'
                 }).then(r => r.json())
             )
         );
