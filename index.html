@@ -193,7 +193,7 @@
 
     <!-- BOTTOM: 3 Bus Stations Layout -->
     <div class="bottom-section">
-        <div class="bus-refresh-notice">Refreshes every 20 seconds</div>
+        <div class="bus-refresh-notice" id="refresh-timer">Refreshes every 20 seconds</div>
         <div class="bus-columns-grid" id="bus-container">
             <!-- Dynamically populated via JS -->
         </div>
@@ -404,7 +404,7 @@
 
         // UI Update Function
         function updateCountdownUI() {
-            const refreshText = document.getElementById('bus-refresh-notice');
+            const refreshText = document.getElementById('refresh-timer');
             if (!refreshText) return;
 
             if (!isOperatingHours()) {
