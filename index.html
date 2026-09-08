@@ -286,10 +286,10 @@
 
         // Define your target 3 bus stations and up to 5 bus services each
         const BUS_STATIONS = [
-            { code: "65539", name: "Blk 224A", services: ["104", "382W"] },
-            { code: "65531", name: "Blk 226A", services: ["104", "382G"] },
-            { code: "65439", name: "Blk 220C", services: ["39", "43", "104", "117", "118", "119"] },
-            { code: "65431", name: "Twin Waterfalls", services: ["39", "43", "104", "117", "118", "119"] }
+            { code: "65539", name: "Blk 224A", interestedBuses: ["104", "382W"] },
+            { code: "65531", name: "Blk 226A", interestedBuses: ["104", "382G"] },
+            { code: "65439", name: "Blk 220C", interestedBuses: ["39", "43", "104", "117", "118", "119"] },
+            { code: "65431", name: "Twin Waterfalls", interestedBuses: ["39", "43", "104", "117", "118", "119"] }
         ];
 
         // Return null for buses that arrived more than 45 seconds ago
@@ -339,6 +339,13 @@
                     const stopData = allStopsData[index];
                     const services = stopData?.Services || [];
                     
+                // FILTER: If interestedBuses is defined, keep only matching bus numbers
+                if (station.interestedBuses && station.interestedBuses.length > 0) {
+                    services = services.filter(bus => 
+                        station.interestedBuses.includes(bus.ServiceNo)
+                    );
+                }
+
                     renderStationColumn(station, services);
                 });
 
