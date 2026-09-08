@@ -1,6 +1,6 @@
 // /api/bus-all.js
 export default async function handler(req, res) {
-    const busStops = ['65539', '65549', '65559', '65569']; // All your kiosk stops
+    const busStops = ['65539', '65531', '65439', '65431']; // All your kiosk stops
     if (!process.env.LTA_KEY) {
         return res.status(500).json({ error: 'LTA_KEY environment variable is missing.' });
     }
