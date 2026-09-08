@@ -1,7 +1,4 @@
-export default async function handler(req, res) {
-  // Allow your HTML page to fetch from this endpoint without CORS issues
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  
+export default async function handler(req, res) { 
   // Get the bus stop code from URL (default to 65431 if not provided)
   const busStopCode = req.query.code || '65431';
   
@@ -22,6 +19,8 @@ export default async function handler(req, res) {
         }
       }
     );
+    // Edge Caching: Fresh for 15s, allow stale-while-revalidate for 10s
+    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=10');
 
     const data = await response.json();
     res.status(200).json(data);

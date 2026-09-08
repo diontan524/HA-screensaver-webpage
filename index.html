@@ -193,7 +193,7 @@
 
     <!-- BOTTOM: 3 Bus Stations Layout -->
     <div class="bottom-section">
-        <div class="bus-refresh-notice">Refreshes every 5 seconds</div>
+        <div class="bus-refresh-notice">Refreshes every 20 seconds</div>
         <div class="bus-columns-grid" id="bus-container">
             <!-- Dynamically populated via JS -->
         </div>
@@ -392,11 +392,67 @@
             `;
         }
 
-        // Run bus fetch immediately on load
-        fetchBusArrivals();
+                // --- CONFIGURATION ---
+        const POLL_INTERVAL = 20; // Fetch every 20 seconds
+        let countdown = POLL_INTERVAL;
 
-        // Refresh bus arrivals automatically every 5 seconds
-        setInterval(fetchBusArrivals, 5000);
+        // Check if current time is within operating hours (6:00 AM to 11:59 PM)
+        function isOperatingHours() {
+            const hour = new Date().getHours();
+            return hour >= 6 && hour < 24; // True between 06:00 and 23:59
+        }
+
+        // UI Update Function
+        function updateCountdownUI() {
+            const refreshText = document.getElementById('bus-refresh-notice');
+            if (!refreshText) return;
+
+            if (!isOperatingHours()) {
+                refreshText.innerText = "Kiosk Paused (Night Mode 12AM-6AM)";
+                return;
+            }
+            refreshText.innerText = `Refreshing in ${countdown}s...`;
+        }
+
+        // Master Fetch Trigger
+        async function triggerBusRefresh() {
+            if (!isOperatingHours()) {
+                console.log("Outside operating hours (6AM - 12AM). Fetch skipped.");
+                updateCountdownUI();
+                return;
+            }
+
+            countdown = POLL_INTERVAL;
+            updateCountdownUI();
+            
+            await fetchBusArrivals();
+        }
+
+        // 1-Second Master Interval Loop
+        setInterval(() => {
+            if (!isOperatingHours()) {
+                updateCountdownUI();
+                return;
+            }
+
+            countdown--;
+            
+            if (countdown <= 0) {
+                triggerBusRefresh();
+            } else {
+                updateCountdownUI();
+            }
+        }, 1000);
+
+        // Initial Execution on Load
+        triggerBusRefresh();
+        
     </script>
 </body>
 </html>
+
+<!-- // Run bus fetch immediately on load
+        fetchBusArrivals();
+
+        // Refresh bus arrivals automatically every 5 seconds
+        setInterval(fetchBusArrivals, 5000); -->
