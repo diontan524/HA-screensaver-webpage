@@ -337,16 +337,19 @@
                 // 2. Loop through each station and render using the matching data index
                 BUS_STATIONS.forEach((station, index) => {
                     const stopData = allStopsData[index];
-                    const services = stopData?.Services || [];
+                    const rawServices = stopData?.Services || [];
                     
                 // FILTER: If interestedBuses is defined, keep only matching bus numbers
-                if (station.interestedBuses && station.interestedBuses.length > 0) {
-                    services = services.filter(bus => 
+                const filteredServices = rawServices.filter(bus => 
                         station.interestedBuses.includes(bus.ServiceNo)
                     );
-                }
+                
+                // Sort filtered buses based on the order defined in your array
+                filteredServices.sort((a, b) => 
+                    station.interestedBuses.indexOf(a.ServiceNo) - station.interestedBuses.indexOf(b.ServiceNo)
+                );
 
-                    renderStationColumn(station, services);
+                    renderStationColumn(station, filteredServices);
                 });
 
             } catch (error) {
