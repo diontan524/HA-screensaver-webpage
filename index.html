@@ -13,7 +13,7 @@
 
         html, body {
             width: 100%;
-            height: 100vh;
+            height: 100%;                   /* CHANGED: was 100vh */
             overflow: hidden;
             background-color: #0b0b0c;
             color: #ffffff;
@@ -21,10 +21,16 @@
         }
 
         body {
+            display: block;                 /* CHANGED: was flex; the #fit wrapper below now does the flex layout */
+            padding: 20px;
+        }
+
+        /* CHANGED: new, this wrapper holds your original layout and gets scaled to fit */
+        #fit {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 20px;
+            transform-origin: top left;
         }
 
         /* TOP: Hero Time & Weather */
@@ -186,6 +192,8 @@
 </head>
 <body>
 
+    <div id="fit">   <!-- CHANGED: new opening tag -->
+
     <!-- TOP: Clock, Date & Weather -->
     <div class="top-section">
         <div id="clock">00:00</div>
@@ -204,6 +212,8 @@
             <!-- Dynamically populated via JS -->
         </div>
     </div>
+
+    </div>           <!-- CHANGED: new closing tag -->
 
     <script>
         // ================= CONFIGURATION =================      
@@ -461,6 +471,40 @@
 
         // Initial Execution on Load
         triggerBusRefresh();
+
+        // ===== CHANGED: new, shrink-to-fit so everything is always on one screen =====
+        const fitEl = document.getElementById('fit');
+
+        function fitToScreen() {
+            const pad = 20;                                  // matches body padding
+            const availW = window.innerWidth  - pad * 2;
+            const availH = window.innerHeight - pad * 2;
+
+            // Measure natural size at 100% scale
+            fitEl.style.transform = 'none';
+            fitEl.style.width  = availW + 'px';
+            fitEl.style.height = 'auto';
+            const natW = Math.max(fitEl.scrollWidth,  availW);
+            const natH = fitEl.scrollHeight;
+
+            // Never scale above 1, so your current sizes are the maximum
+            const scale = Math.min(1, availW / natW, availH / natH);
+
+            // Enlarge the layout box by 1/scale so the scaled result fills the screen exactly
+            fitEl.style.width     = (availW / scale) + 'px';
+            fitEl.style.height    = (availH / scale) + 'px';
+            fitEl.style.transform = `scale(${scale})`;
+        }
+
+        fitToScreen();
+        window.addEventListener('resize', fitToScreen);
+        window.addEventListener('orientationchange', fitToScreen);
+
+        // Re-fit whenever bus rows change (more or fewer buses, "No operating buses" etc.)
+        new MutationObserver(fitToScreen).observe(
+            document.getElementById('bus-container'),
+            { childList: true, subtree: true }
+        );
         
     </script>
 </body>
